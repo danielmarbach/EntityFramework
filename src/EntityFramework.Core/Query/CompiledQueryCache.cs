@@ -9,15 +9,17 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Data.Entity.Internal;
 using Microsoft.Data.Entity.Query.ExpressionTreeVisitors;
 using Microsoft.Data.Entity.Query.ResultOperators;
 using Microsoft.Data.Entity.Storage;
 using Microsoft.Data.Entity.Utilities;
 using Microsoft.Framework.Caching.Memory;
+using JetBrains.Annotations;
 using Remotion.Linq;
+using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.StreamedData;
+using Remotion.Linq.Parsing;
 using Remotion.Linq.Parsing.ExpressionTreeVisitors.Transformation;
 using Remotion.Linq.Parsing.ExpressionTreeVisitors.TreeEvaluation;
 using Remotion.Linq.Parsing.Structure;
@@ -56,6 +58,10 @@ namespace Microsoft.Data.Entity.Query
                 = GetOrAdd(query, queryContext, dataStore, isAsync: false, compiler: (q, ds) =>
                     {
                         var queryModel = CreateQueryParser().GetParsedQuery(q);
+                        queryModel.TransformExpressions(e =>
+                            e != null && e.CanReduce
+                            ? new ReducingExpressionVisitor().VisitExpression(e)
+                            : e);
 
                         var streamedSequenceInfo
                             = queryModel.GetOutputDataInfo() as StreamedSequenceInfo;
@@ -165,10 +171,11 @@ namespace Microsoft.Data.Entity.Query
         {
             public static Expression ExtractParameters(Expression expressionTree, QueryContext queryContext)
             {
-                var partialEvaluationInfo = EvaluatableTreeFindingExpressionTreeVisitor.Analyze(expressionTree);
+                var functionEvaluationDisabledExpression = new FunctionEvaluationDisablingVisitor().VisitExpression(expressionTree);
+                var partialEvaluationInfo = EvaluatableTreeFindingExpressionTreeVisitor.Analyze(functionEvaluationDisabledExpression);
                 var visitor = new ParameterExtractingExpressionTreeVisitor(partialEvaluationInfo, queryContext);
 
-                return visitor.VisitExpression(expressionTree);
+                return visitor.VisitExpression(functionEvaluationDisabledExpression);
             }
 
             private readonly PartialEvaluationInfo _partialEvaluationInfo;
@@ -337,6 +344,117 @@ namespace Microsoft.Data.Entity.Query
                         Expression.Convert(expression, typeof(object)))
                         .Compile()
                         .Invoke();
+            }
+
+            private class FunctionEvaluationDisablingVisitor : ExpressionTreeVisitorBase
+            {
+                protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
+                {
+                    if (IsQueryable(expression.Object) || IsQueryable(expression.Arguments.FirstOrDefault()))
+                    {
+                        return base.VisitMethodCallExpression(expression);
+                    }
+
+                    var newObject = VisitExpression(expression.Object);
+                    var newArguments = VisitAndConvert(expression.Arguments, "VisitMethodCallExpression");
+
+                    var newMethodCall = newObject != expression.Object || newArguments != expression.Arguments
+                        ? Expression.Call(newObject, expression.Method, newArguments)
+                        : expression;
+
+                    return new MethodCallEvaluationPreventingExpression(newMethodCall);
+                }
+
+                private bool IsQueryable(Expression expression)
+                {
+                    if (expression == null)
+                    {
+                        return false;
+                    }
+
+                    return typeof(IQueryable).GetTypeInfo().IsAssignableFrom(expression.Type.GetTypeInfo());
+                }
+
+                protected override Expression VisitMemberExpression(MemberExpression expression)
+                {
+                    return new PropertyEvaluationPreventingExpression(expression);
+                }
+            }
+
+            private class MethodCallEvaluationPreventingExpression : ExtensionExpression
+            {
+                public MethodCallExpression MethodCall { get; private set; }
+
+                public MethodCallEvaluationPreventingExpression(MethodCallExpression argument)
+                    : base(argument.Type)
+                {
+                    MethodCall = argument;
+                }
+
+                public override bool CanReduce
+                {
+                    get
+                    {
+                        return true;
+                    }
+                }
+
+                public override Expression Reduce()
+                {
+                    return MethodCall;
+                }
+
+                protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+                {
+                    var newObject = visitor.VisitExpression(MethodCall.Object);
+                    var newArguments = visitor.VisitAndConvert(MethodCall.Arguments, "VisitChildren");
+
+                    if (newObject != MethodCall.Object
+                        || newArguments != MethodCall.Arguments)
+                    {
+                        return new MethodCallEvaluationPreventingExpression(
+                            Call(newObject, MethodCall.Method, newArguments));
+                    }
+
+                    return this;
+                }
+            }
+
+            private class PropertyEvaluationPreventingExpression : ExtensionExpression
+            {
+                public MemberExpression MemberExpression { get; private set; }
+
+                public PropertyEvaluationPreventingExpression(MemberExpression argument)
+                    : base(argument.Type)
+                {
+                    MemberExpression = argument;
+                }
+
+                public override bool CanReduce
+                {
+                    get
+                    {
+                        return true;
+                    }
+                }
+
+                public override Expression Reduce()
+                {
+                    return MemberExpression;
+                }
+
+                protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+                {
+                    var newExpression = visitor.VisitExpression(MemberExpression.Expression);
+
+                    if (newExpression != MemberExpression.Expression)
+                    {
+                        return new PropertyEvaluationPreventingExpression(
+                            Property(newExpression, MemberExpression.Member.Name));
+                    }
+
+                    return this;
+                }
             }
         }
 

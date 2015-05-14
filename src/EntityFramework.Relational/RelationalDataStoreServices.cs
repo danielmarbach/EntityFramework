@@ -34,6 +34,7 @@ namespace Microsoft.Data.Entity.Relational
         public virtual IModelDiffer ModelDiffer => GetService<ModelDiffer>();
         public virtual IBatchExecutor BatchExecutor => GetService<BatchExecutor>();
         public virtual IRelationalValueBufferFactoryFactory ValueBufferFactoryFactory => GetService<TypedValueBufferFactoryFactory>();
+        public virtual IRelationalFunctionTranslationProvider RelationalFunctionTranslationProvider => GetService<RelationalFunctionTranslationProvider>();
 
         public abstract IHistoryRepository HistoryRepository { get; }
         public abstract IMigrationSqlGenerator MigrationSqlGenerator { get; }
