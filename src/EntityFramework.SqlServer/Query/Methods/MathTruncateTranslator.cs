@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Data.Entity.Relational.Query.Methods;
 using Microsoft.Data.Entity.Relational.Query.Expressions;
 using JetBrains.Annotations;
@@ -14,7 +15,7 @@ namespace Microsoft.Data.Entity.SqlServer.Query.Methods
     {
         public Expression Translate([NotNull] MethodCallExpression methodCallExpression)
         {
-            var methodInfos = typeof(Math).GetMethods().Where(m => m.Name == "Truncate");
+            var methodInfos = typeof(Math).GetTypeInfo().GetDeclaredMethods("Truncate");
             if (methodInfos.Contains(methodCallExpression.Method))
             {
                 var arguments = new[] { methodCallExpression.Arguments[0], Expression.Constant(0), Expression.Constant(1) };

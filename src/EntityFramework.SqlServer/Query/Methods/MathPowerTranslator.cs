@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Data.Entity.Relational.Query.Methods;
 using Microsoft.Data.Entity.Relational.Query.Expressions;
 using JetBrains.Annotations;
@@ -13,7 +14,7 @@ namespace Microsoft.Data.Entity.SqlServer.Query.Methods
     {
         public Expression Translate([NotNull] MethodCallExpression methodCallExpression)
         {
-            var methodInfo = typeof(Math).GetMethod("Pow");
+            var methodInfo = typeof(Math).GetTypeInfo().GetDeclaredMethod("Pow");
             if (methodInfo == methodCallExpression.Method)
             {
                 return new SqlFunctionExpression("POWER", methodCallExpression.Arguments, methodCallExpression.Type);

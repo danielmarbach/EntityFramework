@@ -58,10 +58,7 @@ namespace Microsoft.Data.Entity.Query
                 = GetOrAdd(query, queryContext, dataStore, isAsync: false, compiler: (q, ds) =>
                     {
                         var queryModel = CreateQueryParser().GetParsedQuery(q);
-                        queryModel.TransformExpressions(e =>
-                            e != null && e.CanReduce
-                            ? new ReducingExpressionVisitor().VisitExpression(e)
-                            : e);
+                        queryModel.TransformExpressions(e => new ReducingExpressionVisitor().VisitExpression(e));
 
                         var streamedSequenceInfo
                             = queryModel.GetOutputDataInfo() as StreamedSequenceInfo;
@@ -96,6 +93,7 @@ namespace Microsoft.Data.Entity.Query
                 = GetOrAdd(query, queryContext, dataStore, isAsync: true, compiler: (q, ds) =>
                     {
                         var queryModel = CreateQueryParser().GetParsedQuery(q);
+                        queryModel.TransformExpressions(e => new ReducingExpressionVisitor().VisitExpression(e));
 
                         var executor
                             = CompileQuery(ds, DataStore.CompileAsyncQueryMethod, typeof(TResult), queryModel);
@@ -121,6 +119,7 @@ namespace Microsoft.Data.Entity.Query
                 = GetOrAdd(query, queryContext, dataStore, isAsync: true, compiler: (q, ds) =>
                     {
                         var queryModel = CreateQueryParser().GetParsedQuery(q);
+                        queryModel.TransformExpressions(e => new ReducingExpressionVisitor().VisitExpression(e));
 
                         var executor
                             = CompileQuery(ds, DataStore.CompileAsyncQueryMethod, typeof(TResult), queryModel);
@@ -348,8 +347,22 @@ namespace Microsoft.Data.Entity.Query
 
             private class FunctionEvaluationDisablingVisitor : ExpressionTreeVisitorBase
             {
+                private bool _insidePropertyAccessMethod = false;
+
                 protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
                 {
+                    if (expression.Method.IsGenericMethod
+                        && ReferenceEquals(
+                            expression.Method.GetGenericMethodDefinition(),
+                            QueryExtensions.PropertyMethodInfo))
+                    {
+                        _insidePropertyAccessMethod = true;
+                        var newExpression = base.VisitMethodCallExpression(expression);
+                        _insidePropertyAccessMethod = false;
+
+                        return newExpression;
+                    }
+
                     if (IsQueryable(expression.Object) || IsQueryable(expression.Arguments.FirstOrDefault()))
                     {
                         return base.VisitMethodCallExpression(expression);
@@ -377,7 +390,9 @@ namespace Microsoft.Data.Entity.Query
 
                 protected override Expression VisitMemberExpression(MemberExpression expression)
                 {
-                    return new PropertyEvaluationPreventingExpression(expression);
+                    return _insidePropertyAccessMethod 
+                        ? (Expression)expression 
+                        : new PropertyEvaluationPreventingExpression(expression);
                 }
             }
 

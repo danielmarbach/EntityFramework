@@ -40,7 +40,7 @@ namespace Microsoft.Data.Entity.Relational
             [NotNull] IDbContextOptions options,
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IRelationalValueBufferFactoryFactory valueBufferFactoryFactory,
-            [NotNull] IRelationalFunctionTranslationProvider methodCallTranslatorProvider)
+            [NotNull] IRelationalFunctionTranslationProvider functionTranslationProvider)
             : base(
                 Check.NotNull(model, nameof(model)),
                 Check.NotNull(entityKeyFactorySource, nameof(entityKeyFactorySource)),
@@ -54,13 +54,13 @@ namespace Microsoft.Data.Entity.Relational
             Check.NotNull(options, nameof(options));
             Check.NotNull(options, nameof(options));
             Check.NotNull(valueBufferFactoryFactory, nameof(valueBufferFactoryFactory));
-            Check.NotNull(methodCallTranslatorProvider, nameof(methodCallTranslatorProvider));
+            Check.NotNull(functionTranslationProvider, nameof(functionTranslationProvider));
 
             _batchPreparer = batchPreparer;
             _batchExecutor = batchExecutor;
             _connection = connection;
             _options = options;
-            _methodCallTranslatorProvider = methodCallTranslatorProvider;
+            _methodCallTranslatorProvider = functionTranslationProvider;
 
             ValueBufferFactoryFactory = valueBufferFactoryFactory;
         }

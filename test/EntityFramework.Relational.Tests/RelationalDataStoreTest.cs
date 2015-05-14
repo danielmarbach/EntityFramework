@@ -85,7 +85,8 @@ namespace Microsoft.Data.Entity.Relational.Tests
                 IBatchExecutor batchExecutor,
                 IDbContextOptions options,
                 ILoggerFactory loggerFactory,
-                IRelationalValueBufferFactoryFactory valueBufferFactoryFactory)
+                IRelationalValueBufferFactoryFactory valueBufferFactoryFactory,
+                IRelationalFunctionTranslationProvider functionTranslationProvider)
                 : base(
                       model, 
                       entityKeyFactorySource, 
@@ -96,7 +97,8 @@ namespace Microsoft.Data.Entity.Relational.Tests
                       batchExecutor, 
                       options, 
                       loggerFactory,
-                      valueBufferFactoryFactory)
+                      valueBufferFactoryFactory,
+                      functionTranslationProvider)
             {
             }
         }

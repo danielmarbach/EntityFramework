@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Data.Entity.Relational.Query.Methods;
 using Microsoft.Data.Entity.Relational.Query.Expressions;
 using JetBrains.Annotations;
@@ -13,7 +14,10 @@ namespace Microsoft.Data.Entity.SqlServer.Query.Methods
     {
         public Expression Translate([NotNull] MethodCallExpression methodCallExpression)
         {
-            var methodInfo = typeof(string).GetMethods().Where(m => m.Name == "Replace" && m.GetParameters()[0].ParameterType == typeof(string)).Single();
+            var methodInfo = typeof(string).GetTypeInfo().GetDeclaredMethods("Replace")
+                .Where(m => m.GetParameters()[0].ParameterType == typeof(string))
+                .Single();
+
             if (methodInfo == methodCallExpression.Method)
             {
                 var sqlArguments = new[] { methodCallExpression.Object }.Concat(methodCallExpression.Arguments);

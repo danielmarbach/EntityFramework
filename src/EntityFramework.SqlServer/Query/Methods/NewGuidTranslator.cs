@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Data.Entity.Relational.Query.Methods;
 using Microsoft.Data.Entity.Relational.Query.Expressions;
 using JetBrains.Annotations;
@@ -14,7 +15,7 @@ namespace Microsoft.Data.Entity.SqlServer.Query.Methods
     {
         public Expression Translate([NotNull] MethodCallExpression methodCallExpression)
         {
-            var methodInfo = typeof(Guid).GetMethod("NewGuid");
+            var methodInfo = typeof(Guid).GetTypeInfo().GetDeclaredMethod("NewGuid");
             if (methodCallExpression.Method == methodInfo)
             {
                 return new SqlFunctionExpression("NEWID", Enumerable.Empty<Expression>(), methodCallExpression.Type);
