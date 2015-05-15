@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,7 +16,7 @@ namespace Microsoft.Data.Entity.Query.Annotations
     {
         private readonly List<PropertyInfo> _chainedNavigationProperties;
 
-        public virtual Expression NavigationPropertyPath { get; }
+        public virtual Expression NavigationPropertyPath { get; private set; }
 
         public virtual IReadOnlyList<PropertyInfo> ChainedNavigationProperties => _chainedNavigationProperties;
 
@@ -32,6 +33,11 @@ namespace Microsoft.Data.Entity.Query.Annotations
             Check.NotNull(propertyInfos, nameof(propertyInfos));
 
             _chainedNavigationProperties.AddRange(propertyInfos);
+        }
+
+        public override void TransformExpressions([NotNull]Func<Expression, Expression> transformation)
+        {
+            NavigationPropertyPath = transformation(NavigationPropertyPath);
         }
 
         public override string ToString()

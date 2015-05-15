@@ -11,5 +11,10 @@ namespace Microsoft.Data.Entity.InMemory.FunctionalTests
             : base(fixture)
         {
         }
+
+        public override void Include_references_then_include_collection_multi_level_predicate()
+        {
+            base.Include_references_then_include_collection_multi_level_predicate();
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using JetBrains.Annotations;
 using Microsoft.Data.Entity.Query.Annotations;
+using Microsoft.Data.Entity.Query.ExpressionTreeVisitors;
 using Microsoft.Data.Entity.Utilities;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
@@ -27,7 +28,9 @@ namespace Microsoft.Data.Entity.Query.ResultOperators
         {
             Check.NotNull(navigationPropertyPathLambda, nameof(navigationPropertyPathLambda));
 
-            _navigationPropertyPathLambda = navigationPropertyPathLambda;
+            // TODO: is there a better way to avoid undesirable expressions in here?
+            _navigationPropertyPathLambda = (LambdaExpression)new ReducingExpressionVisitor().VisitExpression(navigationPropertyPathLambda);
+            //_navigationPropertyPathLambda = navigationPropertyPathLambda;
         }
 
         protected override ResultOperatorBase CreateResultOperator(ClauseGenerationContext clauseGenerationContext)

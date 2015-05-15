@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using JetBrains.Annotations;
+using System;
+using System.Linq.Expressions;
 using Microsoft.Data.Entity.Utilities;
+using JetBrains.Annotations;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
@@ -23,6 +25,10 @@ namespace Microsoft.Data.Entity.Query
 
                 _queryModel = value;
             }
+        }
+
+        public virtual void TransformExpressions([NotNull] Func<Expression, Expression> transformation)
+        {
         }
 
         public virtual IQuerySource QuerySource

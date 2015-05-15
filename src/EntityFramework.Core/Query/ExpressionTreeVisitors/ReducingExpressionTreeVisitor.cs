@@ -3,6 +3,7 @@
 
 using System.Linq.Expressions;
 using JetBrains.Annotations;
+using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
 namespace Microsoft.Data.Entity.Query.ExpressionTreeVisitors
@@ -12,7 +13,14 @@ namespace Microsoft.Data.Entity.Query.ExpressionTreeVisitors
         public override Expression VisitExpression([NotNull] Expression node)
             => node != null
                && node.CanReduce
-                ? base.VisitExpression(node.Reduce())
+                ? VisitExpression(node.Reduce())
                 : base.VisitExpression(node);
+
+        protected override Expression VisitSubQueryExpression(SubQueryExpression expression)
+        {
+            expression.QueryModel.TransformExpressions(VisitExpression);
+
+            return expression;
+        }
     }
 }

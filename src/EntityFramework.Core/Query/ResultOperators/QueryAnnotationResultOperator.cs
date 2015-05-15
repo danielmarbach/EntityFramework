@@ -14,7 +14,7 @@ namespace Microsoft.Data.Entity.Query.ResultOperators
 {
     public class QueryAnnotationResultOperator : SequenceTypePreservingResultOperatorBase
     {
-        private readonly ConstantExpression _annotationExpression;
+        private ConstantExpression _annotationExpression;
 
         public QueryAnnotationResultOperator([NotNull] ConstantExpression annotationExpression)
         {
@@ -40,6 +40,7 @@ namespace Microsoft.Data.Entity.Query.ResultOperators
 
         public override void TransformExpressions([NotNull] Func<Expression, Expression> transformation)
         {
+            Annotation.TransformExpressions(transformation);
         }
 
         public override StreamedSequence ExecuteInMemory<T>([NotNull] StreamedSequence input) => input;
