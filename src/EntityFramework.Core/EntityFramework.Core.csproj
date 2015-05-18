@@ -193,8 +193,11 @@
     <Compile Include="Query\Annotations\IncludeQueryAnnotation.cs" />
     <Compile Include="Query\EntityLoadInfo.cs" />
     <Compile Include="Query\EntityTrackingInfo.cs" />
+    <Compile Include="Query\Expressions\MethodCallWrappingExpression.cs" />
+    <Compile Include="Query\Expressions\PropertyWrappingExpression.cs" />
     <Compile Include="Query\ExpressionTreeVisitors\ExpressionStringBuilder.cs" />
     <Compile Include="Query\ExpressionTreeVisitors\ExpressionTreeVisitorBase.cs" />
+    <Compile Include="Query\ExpressionTreeVisitors\FunctionEvaluationEnablingVisitor.cs" />
     <Compile Include="Query\ExpressionTreeVisitors\ReducingExpressionTreeVisitor.cs" />
     <Compile Include="Query\IEntityQueryProvider.cs" />
     <Compile Include="Query\IIncludableQueryable.cs" />

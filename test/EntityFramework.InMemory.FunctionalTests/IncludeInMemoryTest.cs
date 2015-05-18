@@ -16,5 +16,10 @@ namespace Microsoft.Data.Entity.InMemory.FunctionalTests
         {
             base.Include_references_then_include_collection_multi_level_predicate();
         }
+
+        public override void Include_collection_on_additional_from_clause2()
+        {
+            base.Include_collection_on_additional_from_clause2();
+        }
     }
 }

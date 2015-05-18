@@ -31,7 +31,7 @@ namespace Microsoft.Data.Entity.Query.ResultOperators
             Check.NotNull(navigationPropertyPathLambda, nameof(navigationPropertyPathLambda));
 
             // TODO: is there a better way to avoid undesirable expressions in here?
-            _navigationPropertyPathLambda = (LambdaExpression)new ReducingExpressionVisitor().VisitExpression(navigationPropertyPathLambda);
+            _navigationPropertyPathLambda = (LambdaExpression)new FunctionEvaluationEnablingVisitor().VisitExpression(navigationPropertyPathLambda);
             //_navigationPropertyPathLambda = navigationPropertyPathLambda;
         }
 

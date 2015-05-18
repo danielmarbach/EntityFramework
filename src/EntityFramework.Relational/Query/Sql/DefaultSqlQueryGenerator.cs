@@ -849,6 +849,21 @@ namespace Microsoft.Data.Entity.Relational.Query.Sql
         protected virtual string GenerateLiteral([NotNull] object value)
             => string.Format(CultureInfo.InvariantCulture, "{0}", value);
 
+        protected virtual string GenerateLiteral(int value)
+            => value.ToString();
+
+        protected virtual string GenerateLiteral(short value)
+            => value.ToString();
+
+        protected virtual string GenerateLiteral(long value)
+            => value.ToString();
+
+        protected virtual string GenerateLiteral(byte value)
+            => value.ToString();
+
+        protected virtual string GenerateLiteral(decimal value)
+            => value.ToString();
+
         protected virtual string GenerateLiteral(double value)
             => value + "E0";
 
