@@ -11,5 +11,10 @@ namespace Microsoft.Data.Entity.InMemory.FunctionalTests
             : base(fixture)
         {
         }
+
+        public override void Where_field_access_closure_via_query_cache()
+        {
+            base.Where_field_access_closure_via_query_cache();
+        }
     }
 }

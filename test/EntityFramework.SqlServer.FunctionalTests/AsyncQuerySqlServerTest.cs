@@ -43,8 +43,9 @@ namespace Microsoft.Data.Entity.SqlServer.FunctionalTests
 
         public override async Task String_Contains_MethodCall()
         {
+            var localMethod1 = LocalMethod1();
             await AssertQuery<Customer>(
-                cs => cs.Where(c => c.ContactName.Contains(LocalMethod1())), // case-insensitive
+                cs => cs.Where(c => c.ContactName.Contains(localMethod1)), // case-insensitive
                 cs => cs.Where(c => c.ContactName.Contains(LocalMethod1()) 
                                     || c.ContactName.Contains(LocalMethod2())), // case-sensitive
                 entryCount: 34);

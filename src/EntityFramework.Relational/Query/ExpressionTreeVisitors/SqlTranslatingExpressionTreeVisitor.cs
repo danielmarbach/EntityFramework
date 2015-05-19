@@ -205,7 +205,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
             var operand = VisitExpression(methodCallExpression.Object);
 
-            if (operand != null)
+            if (operand != null || methodCallExpression.Object == null)
             {
                 var arguments
                     = methodCallExpression.Arguments
@@ -215,18 +215,22 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
 
                 if (arguments.Length == methodCallExpression.Arguments.Count)
                 {
-                    var boundExpression
-                        = Expression.Call(
-                            operand,
-                            methodCallExpression.Method,
-                            arguments);
+                    var boundExpression = operand != null
+                        ? Expression.Call(operand, methodCallExpression.Method, arguments)
+                        : Expression.Call(methodCallExpression.Method, arguments);
 
-                    return _queryModelVisitor.QueryCompilationContext.MethodCallTranslator
-                        .Translate(boundExpression);
+                    foreach (var methodCallTranslator in _queryModelVisitor.QueryCompilationContext.FunctionTranslationProvider.MethodCallTranslators)
+                    {
+                        var translatedMethodCall = methodCallTranslator.Translate(boundExpression);
+                        if (translatedMethodCall != null)
+                        {
+                            return translatedMethodCall;
+                        }
+                    }
                 }
             }
-            else
-            {
+            //else
+            //{
                 return _queryModelVisitor
                     .BindMethodCallExpression(
                         methodCallExpression,
@@ -236,14 +240,27 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                                     _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
                                     property,
                                     selectExpression.FindTableForQuerySource(querySource))));
-            }
+            //}
 
-            return null;
+            //return null;
         }
 
         protected override Expression VisitMemberExpression([NotNull] MemberExpression memberExpression)
         {
             Check.NotNull(memberExpression, nameof(memberExpression));
+
+            foreach (var propertyTranslator in _queryModelVisitor.QueryCompilationContext.FunctionTranslationProvider.PropertyTranslators)
+            {
+                if (propertyTranslator.CanTranslate(memberExpression))
+                {
+                    var newExpression = VisitExpression(memberExpression.Expression);
+                    var newMemberExpression = newExpression != memberExpression.Expression
+                        ? Expression.Property(newExpression, memberExpression.Member.Name)
+                        : memberExpression;
+
+                    return propertyTranslator.Translate(newMemberExpression);
+                }
+            }
 
             return _queryModelVisitor
                 .BindMemberExpression(
@@ -335,6 +352,7 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                 typeof(byte),
                 typeof(byte[]),
                 typeof(char),
+                typeof(decimal),
                 typeof(DateTime),
                 typeof(DateTimeOffset),
                 typeof(double),

@@ -424,21 +424,21 @@ namespace Microsoft.Data.Entity.FunctionalTests
                 entryCount: 4);
         }
 
-        [Fact]
-        public virtual void Where_method_call_closure_via_query_cache()
-        {
-            var city = new City { InstanceFieldValue = "London" };
+        //[Fact]
+        //public virtual void Where_method_call_closure_via_query_cache()
+        //{
+        //    var city = new City { InstanceFieldValue = "London" };
 
-            AssertQuery<Customer>(
-                cs => cs.Where(c => c.City == city.GetCity()),
-                entryCount: 6);
+        //    AssertQuery<Customer>(
+        //        cs => cs.Where(c => c.City == city.GetCity()),
+        //        entryCount: 6);
 
-            city.InstanceFieldValue = "Seattle";
+        //    city.InstanceFieldValue = "Seattle";
 
-            AssertQuery<Customer>(
-                cs => cs.Where(c => c.City == city.GetCity()),
-                entryCount: 1);
-        }
+        //    AssertQuery<Customer>(
+        //        cs => cs.Where(c => c.City == city.GetCity()),
+        //        entryCount: 1);
+        //}
 
         [Fact]
         public virtual void Where_field_access_closure_via_query_cache()
@@ -2610,18 +2610,6 @@ namespace Microsoft.Data.Entity.FunctionalTests
         }
 
         [Fact]
-        public virtual void OrderBy_Count_with_predicate_client_eval_mixed()
-        {
-            AssertQuery<Order>(os => os.OrderBy(o => o.OrderID).Count(o => ClientEvalPredicateStateless()));
-        }
-
-        [Fact]
-        public virtual void OrderBy_Where_Count_with_predicate_client_eval()
-        {
-            AssertQuery<Order>(os => os.OrderBy(o => ClientEvalSelectorStateless()).Where(o => ClientEvalPredicateStateless()).Count(o => ClientEvalPredicate(o)));
-        }
-
-        [Fact]
         public virtual void OrderBy_Where_Count_with_predicate_client_eval_mixed()
         {
             AssertQuery<Order>(os => os.OrderBy(o => o.OrderID).Where(o => ClientEvalPredicate(o)).Count(o => o.CustomerID != "ALFKI"));
@@ -2888,10 +2876,19 @@ namespace Microsoft.Data.Entity.FunctionalTests
         }
 
         [Fact]
-        public virtual void String_StartsWith_MethodCall()
+        public virtual void String_StartsWith_MethodCall_inline()
         {
             AssertQuery<Customer>(
                 cs => cs.Where(c => c.ContactName.StartsWith(LocalMethod1())),
+                entryCount: 12);
+        }
+
+        [Fact]
+        public virtual void String_StartsWith_MethodCall_closure()
+        {
+            var localMethod = LocalMethod1();
+            AssertQuery<Customer>(
+                cs => cs.Where(c => c.ContactName.StartsWith(localMethod)),
                 entryCount: 12);
         }
 
@@ -2922,8 +2919,9 @@ namespace Microsoft.Data.Entity.FunctionalTests
         [Fact]
         public virtual void String_EndsWith_MethodCall()
         {
+            var localMethod2 = LocalMethod2();
             AssertQuery<Customer>(
-                cs => cs.Where(c => c.ContactName.EndsWith(LocalMethod2())),
+                cs => cs.Where(c => c.ContactName.EndsWith(localMethod2)),
                 entryCount: 1);
         }
 
