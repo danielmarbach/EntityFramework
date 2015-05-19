@@ -22,5 +22,10 @@ namespace Microsoft.Data.Entity.Sqlite.FunctionalTests
         {
             return base.Include_collection_order_by_non_key();
         }
+
+        public override Task Include_collection()
+        {
+            return base.Include_collection();
+        }
     }
 }

@@ -229,8 +229,8 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                     }
                 }
             }
-            else
-            {
+            //else
+            //{
                 return _queryModelVisitor
                     .BindMethodCallExpression(
                         methodCallExpression,
@@ -240,9 +240,9 @@ namespace Microsoft.Data.Entity.Relational.Query.ExpressionTreeVisitors
                                     _queryModelVisitor.QueryCompilationContext.GetColumnName(property),
                                     property,
                                     selectExpression.FindTableForQuerySource(querySource))));
-            }
+            //}
 
-            return null;
+            //return null;
         }
 
         protected override Expression VisitMemberExpression([NotNull] MemberExpression memberExpression)

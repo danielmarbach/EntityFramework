@@ -215,24 +215,24 @@ WHERE [c].[City] = @__city_InstanceFieldValue_0",
                 Sql);
         }
 
-        public override void Where_method_call_closure_via_query_cache()
-        {
-            base.Where_method_call_closure_via_query_cache();
+//        public override void Where_method_call_closure_via_query_cache()
+//        {
+//            base.Where_method_call_closure_via_query_cache();
 
-            Assert.Equal(
-                @"__GetCity_0: London
+//            Assert.Equal(
+//                @"__GetCity_0: London
 
-SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
-FROM [Customers] AS [c]
-WHERE [c].[City] = @__GetCity_0
+//SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+//FROM [Customers] AS [c]
+//WHERE [c].[City] = @__GetCity_0
 
-__GetCity_0: Seattle
+//__GetCity_0: Seattle
 
-SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
-FROM [Customers] AS [c]
-WHERE [c].[City] = @__GetCity_0",
-                Sql);
-        }
+//SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+//FROM [Customers] AS [c]
+//WHERE [c].[City] = @__GetCity_0",
+//                Sql);
+//        }
 
         public override void Where_method_call_nullable_type_reverse_closure_via_query_cache()
         {

@@ -424,21 +424,21 @@ namespace Microsoft.Data.Entity.FunctionalTests
                 entryCount: 4);
         }
 
-        [Fact]
-        public virtual void Where_method_call_closure_via_query_cache()
-        {
-            var city = new City { InstanceFieldValue = "London" };
+        //[Fact]
+        //public virtual void Where_method_call_closure_via_query_cache()
+        //{
+        //    var city = new City { InstanceFieldValue = "London" };
 
-            AssertQuery<Customer>(
-                cs => cs.Where(c => c.City == city.GetCity()),
-                entryCount: 6);
+        //    AssertQuery<Customer>(
+        //        cs => cs.Where(c => c.City == city.GetCity()),
+        //        entryCount: 6);
 
-            city.InstanceFieldValue = "Seattle";
+        //    city.InstanceFieldValue = "Seattle";
 
-            AssertQuery<Customer>(
-                cs => cs.Where(c => c.City == city.GetCity()),
-                entryCount: 1);
-        }
+        //    AssertQuery<Customer>(
+        //        cs => cs.Where(c => c.City == city.GetCity()),
+        //        entryCount: 1);
+        //}
 
         [Fact]
         public virtual void Where_field_access_closure_via_query_cache()
