@@ -150,17 +150,11 @@ WHERE [c].[City] = @__city_Nested_InstanceFieldValue_0",
             base.Where_static_property_access_closure_via_query_cache();
 
             Assert.Equal(
-                @"__StaticPropertyValue_0: London
+                @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c]
 
 SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
-FROM [Customers] AS [c]
-WHERE [c].[City] = @__StaticPropertyValue_0
-
-__StaticPropertyValue_0: Seattle
-
-SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
-FROM [Customers] AS [c]
-WHERE [c].[City] = @__StaticPropertyValue_0",
+FROM [Customers] AS [c]",
                 Sql);
         }
 
@@ -400,32 +394,6 @@ FROM [Orders] AS [o]",
             Assert.Equal(
                 @"SELECT [o].[OrderID], [o].[CustomerID], [o].[EmployeeID], [o].[OrderDate]
 FROM [Orders] AS [o]",
-                Sql);
-        }
-
-        public override void OrderBy_Count_with_predicate_client_eval_mixed()
-        {
-            base.OrderBy_Count_with_predicate_client_eval_mixed();
-
-            Assert.Equal(
-                @"__ClientEvalPredicateStateless_0: True
-
-SELECT COUNT(*)
-FROM [Orders] AS [o]
-WHERE @__ClientEvalPredicateStateless_0 = 1",
-                Sql);
-        }
-
-        public override void OrderBy_Where_Count_with_predicate_client_eval()
-        {
-            base.OrderBy_Where_Count_with_predicate_client_eval();
-
-            Assert.Equal(
-                @"__ClientEvalPredicateStateless_1: True
-
-SELECT [o].[OrderID], [o].[CustomerID], [o].[EmployeeID], [o].[OrderDate]
-FROM [Orders] AS [o]
-WHERE @__ClientEvalPredicateStateless_1 = 1",
                 Sql);
         }
 
@@ -1122,7 +1090,8 @@ WHERE [e].[ReportsTo] = @__nullableIntPrm_0",
 
             Assert.Equal(
                 @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
-FROM [Customers] AS [c]",
+FROM [Customers] AS [c]
+WHERE (LEN([c].[City]) = 6)",
                 Sql);
         }
 
@@ -2174,16 +2143,26 @@ WHERE [c].[ContactName] LIKE [c].[ContactName] + '%'",
                 Sql);
         }
 
-        public override void String_StartsWith_MethodCall()
+        public override void String_StartsWith_MethodCall_inline()
         {
-            base.String_StartsWith_MethodCall();
+            base.String_StartsWith_MethodCall_inline();
 
             Assert.Equal(
-                @"__LocalMethod1_0: M
+                @"SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
+FROM [Customers] AS [c]",
+                Sql);
+        }
+
+        public override void String_StartsWith_MethodCall_closure()
+        {
+            base.String_StartsWith_MethodCall_closure();
+
+            Assert.Equal(
+                @"__localMethod_0: M
 
 SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
-WHERE [c].[ContactName] LIKE @__LocalMethod1_0 + '%'",
+WHERE [c].[ContactName] LIKE @__localMethod_0 + '%'",
                 Sql);
         }
 
@@ -2225,11 +2204,11 @@ WHERE [c].[ContactName] LIKE '%' + [c].[ContactName]",
             base.String_EndsWith_MethodCall();
 
             Assert.Equal(
-                @"__LocalMethod2_0: m
+                @"__localMethod2_0: m
 
 SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
-WHERE [c].[ContactName] LIKE '%' + @__LocalMethod2_0",
+WHERE [c].[ContactName] LIKE '%' + @__localMethod2_0",
                 Sql);
         }
 
@@ -2271,17 +2250,18 @@ WHERE [c].[ContactName] LIKE ('%' + [c].[ContactName] + '%')",
 
         public override void String_Contains_MethodCall()
         {
+            var localMethod1 = LocalMethod1();
             AssertQuery<Customer>(
-                cs => cs.Where(c => c.ContactName.Contains(LocalMethod1())), // case-insensitive
+                cs => cs.Where(c => c.ContactName.Contains(localMethod1)), // case-insensitive
                 cs => cs.Where(c => c.ContactName.Contains(LocalMethod1()) || c.ContactName.Contains(LocalMethod2())), // case-sensitive
                 entryCount: 34);
 
             Assert.Equal(
-                @"__LocalMethod1_0: M
+                @"__localMethod1_0: M
 
 SELECT [c].[CustomerID], [c].[Address], [c].[City], [c].[CompanyName], [c].[ContactName], [c].[ContactTitle], [c].[Country], [c].[Fax], [c].[Phone], [c].[PostalCode], [c].[Region]
 FROM [Customers] AS [c]
-WHERE [c].[ContactName] LIKE ('%' + @__LocalMethod1_0 + '%')",
+WHERE [c].[ContactName] LIKE ('%' + @__localMethod1_0 + '%')",
                 Sql);
         }
 
