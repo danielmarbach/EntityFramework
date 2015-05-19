@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Data.Entity.Relational.Query.Methods;
 using Microsoft.Framework.Logging;
+using JetBrains.Annotations;
 
 namespace Microsoft.Data.Entity.Relational.Query
 {
@@ -12,7 +13,7 @@ namespace Microsoft.Data.Entity.Relational.Query
         private List<IMethodCallTranslator> _relationalMethodCallTranslators;
         private List<IPropertyTranslator> _relationalPropertyTranslators;
 
-        public RelationalFunctionTranslationProvider(ILoggerFactory loggerFactory)
+        public RelationalFunctionTranslationProvider([NotNull] ILoggerFactory loggerFactory)
         {
             _relationalMethodCallTranslators = new List<IMethodCallTranslator>
             {

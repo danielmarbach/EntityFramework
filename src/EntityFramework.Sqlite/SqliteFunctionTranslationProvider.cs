@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.Data.Entity.Relational.Query;
 using Microsoft.Data.Entity.Relational.Query.Methods;
 using Microsoft.Framework.Logging;
+using JetBrains.Annotations;
 
 namespace Microsoft.Data.Entity.Sqlite
 {
@@ -14,7 +15,7 @@ namespace Microsoft.Data.Entity.Sqlite
         private List<IMethodCallTranslator> _sqliteMethodCallTranslators;
         private List<IPropertyTranslator> _sqlitePropertyTranslators;
 
-        public SqliteFunctionTranslationProvider(ILoggerFactory loggerFactory)
+        public SqliteFunctionTranslationProvider([NotNull] ILoggerFactory loggerFactory)
             : base(loggerFactory)
         {
             _sqliteMethodCallTranslators = new List<IMethodCallTranslator>();

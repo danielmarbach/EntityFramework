@@ -348,21 +348,19 @@ namespace Microsoft.Data.Entity.Query
 
             private class FunctionEvaluationDisablingVisitor : ExpressionTreeVisitorBase
             {
-                //private bool _insidePropertyAccessMethod = false;
+                public static readonly MethodInfo DbContextSetMethodInfo
+                    = typeof(DbContext).GetTypeInfo().GetDeclaredMethod("Set");
 
                 protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
                 {
-                    if (expression.Method.IsGenericMethod
-                        && ReferenceEquals(
-                            expression.Method.GetGenericMethodDefinition(),
-                            QueryExtensions.PropertyMethodInfo))
+                    if (expression.Method.IsGenericMethod)
                     {
-                        return base.VisitMethodCallExpression(expression);
-                        //_insidePropertyAccessMethod = true;
-                        //var newExpression = base.VisitMethodCallExpression(expression);
-                        //_insidePropertyAccessMethod = false;
-
-                        //return newExpression;
+                        var genericMethodDefinition = expression.Method.GetGenericMethodDefinition();
+                        if (ReferenceEquals(genericMethodDefinition, QueryExtensions.PropertyMethodInfo)
+                            || ReferenceEquals(genericMethodDefinition, DbContextSetMethodInfo))
+                        {
+                            return base.VisitMethodCallExpression(expression);
+                        }
                     }
 
                     if (IsQueryable(expression.Object) || IsQueryable(expression.Arguments.FirstOrDefault()))
@@ -397,16 +395,6 @@ namespace Microsoft.Data.Entity.Query
                     return propertyInfo != null && propertyInfo.GetMethod.IsStatic
                         ? (Expression)new PropertyWrappingExpression(expression)
                         : expression;
-
-                    //if (propertyInfo != null && propertyInfo.GetMethod.IsStatic memberInfo.DeclaringType != null)
-                    //{
-                    //    return null;
-                    //}
-
-
-                    //return _insidePropertyAccessMethod 
-                    //    ? (Expression)expression 
-                    //    : new PropertyWrappingExpression(expression);
                 }
             }
 

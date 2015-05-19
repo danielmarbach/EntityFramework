@@ -17,18 +17,18 @@ namespace Microsoft.Data.Entity.Relational.Query.Expressions
     public class SqlFunctionExpression : ExtensionExpression
     {
         public SqlFunctionExpression(
-            string functionName,
-            IEnumerable<Expression> arguments,
-            Type returnType)
+            [NotNull] string functionName,
+            [NotNull] IEnumerable<Expression> arguments,
+            [NotNull] Type returnType)
             : base(returnType)
         {
             FunctionName = functionName;
             Arguments = new ReadOnlyCollection<Expression>(arguments.ToList());
         }
 
-        public string FunctionName { get; set; }
+        public virtual string FunctionName { get; [param: NotNull] set; }
 
-        public ReadOnlyCollection<Expression> Arguments { get; private set; }
+        public virtual ReadOnlyCollection<Expression> Arguments { get; private set; }
 
         public override Expression Accept([NotNull] ExpressionTreeVisitor visitor)
         {
